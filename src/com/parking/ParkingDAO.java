@@ -3,41 +3,42 @@ package com.parking;
 import java.util.List;
 
 /**
- * <h2>ParkingDAO</h2>
- * Defines the contract interface for our Data Access Object pattern. 
- * Abstracts database interactions from higher layers of application logic.
+ * ParkingDAO interface defines the database operations
+ * for the Smart Parking Management System.
  */
 public interface ParkingDAO {
-    
+
     /**
-     * Allocates an available slot inside the persistent engine for a specific vehicle.
+     * Parks a vehicle in an available parking spot.
      *
-     * @param vehicleNumber Structural identifier code mapped onto the space entity.
-     * @param vehicleType   Classification parameter determining storage properties (e.g., CAR, BIKE).
-     * @return true if persistence state successfully saved; false if errors occur.
+     * @param vehicleNumber Vehicle registration number
+     * @param vehicleType Type of vehicle (CAR or BIKE)
+     * @return true if the vehicle is parked successfully, otherwise false
      */
     boolean parkVehicle(String vehicleNumber, String vehicleType);
 
     /**
-     * Frees an allocated slot from the registry, clears fields, and generates dynamic invoices.
+     * Removes a vehicle from a parking spot
+     * and frees the parking space.
      *
-     * @param spotId Unique key identity pointing to spatial database records.
-     * @return true if records successfully cleared and closed; false if operation failed.
+     * @param spotId Parking spot ID
+     * @return true if the vehicle is unparked successfully, otherwise false
      */
     boolean unparkVehicle(int spotId);
 
     /**
-     * Pulls the complete array dataset of slots managed under active storage arrays.
+     * Retrieves all parking spots from the database.
      *
-     * @return a {@link List} containing complete historical mapped {@link ParkingSpot} entities.
+     * @return List of all parking spots
      */
     List<ParkingSpot> getAllSpots();
 
     /**
-     * Filters available spaces matching classification descriptors.
+     * Retrieves all available parking spots
+     * for the given vehicle type.
      *
-     * @param vehicleType Classification constraints matching targeting elements.
-     * @return a filtered {@link List} containing match records whose current status is free.
+     * @param vehicleType Type of vehicle (CAR or BIKE)
+     * @return List of available parking spots
      */
     List<ParkingSpot> getAvailableSpotsByVehicleType(String vehicleType);
 }

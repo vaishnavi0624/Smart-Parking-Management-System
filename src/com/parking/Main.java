@@ -5,37 +5,39 @@ import java.util.Scanner;
 import java.util.regex.Pattern;
 
 /**
- * <h2>Main</h2>
- * Acts as the Presentation Layer / Command Line Interface (CLI) controller. Handles
- * stream inputs, regular expression validation, error handling, and orchestrating
- * user operations down to the structural Data Access Layer.
- * 
+ * Main class of the Smart Parking Management System.
+ * It displays the menu, takes user input, validates it,
+ * and calls the required database operations.
+ *
  * @author Easha Kadganve
  * @author Vaishnavi Jadhav
  * @version 1.0.0
  * @since 2026-07-14
  */
 public class Main {
-    /** Dedicated Scanner instance listening onto standard user input console stream. */
+
+    /** Scanner object to read user input from the console. */
     private static final Scanner scanner = new Scanner(System.in);
-    
-    /** Abstract loose decoupling binding to data interface handling persistent requests. */
+
+    /** DAO object used to perform database operations. */
     private static final ParkingDAO parkingDAO = new ParkingDAOImpl();
 
-    /** 
-     * Regex constraint: Requires string length bounds between 4 and 15 items.
-     * Accepts alphanumeric literals, spacing gaps, or traditional dash hyphens.
+    /**
+     * Strict regex for Indian vehicle registration plates.
+     * Examples allowed: MH-12-AB-1234, MH12AB1234, MH 12 AB 1234, KA-01-M-9999
      */
-    private static final Pattern VEHICLE_PLATE_PATTERN = Pattern.compile("^[A-Z0-9\\s\\-]{4,15}$", Pattern.CASE_INSENSITIVE);
+    private static final Pattern VEHICLE_PLATE_PATTERN =
+            Pattern.compile("^[A-Z]{2}[-\\s]?[0-9]{2}[-\\s]?[A-Z]{1,3}[-\\s]?[0-9]{4}$", Pattern.CASE_INSENSITIVE);
 
     /**
-     * Runtime system orchestrator loop presenting interactive selection states.
+     * Main method where the program starts.
+     * Displays the menu and performs the selected operation.
      *
-     * @param args Array of execution arguments passed into runtime environment.
+     * @param args Command-line arguments
      */
     public static void main(String[] args) {
         System.out.println("=== Welcome to Smart Parking Management System ===");
-        
+
         while (true) {
             System.out.println("\n--- MENU ---");
             System.out.println("1. Park a Vehicle");
@@ -71,13 +73,13 @@ public class Main {
     }
 
     /**
-     * Intercepts user streams to handle allocation procedures.
-     * Sanitizes inputs and runs edge validations prior to handing execution to the DAO layer.
+     * Takes vehicle details from the user,
+     * validates them, and parks the vehicle.
      */
     private static void handlePark() {
         System.out.print("Enter Vehicle Type (CAR / BIKE): ");
         String vehicleType = scanner.nextLine().trim().toUpperCase();
-        
+
         if (!vehicleType.equals("CAR") && !vehicleType.equals("BIKE")) {
             System.out.println("❌ Validation Error: System only supports 'CAR' or 'BIKE'.");
             return;
@@ -90,79 +92,92 @@ public class Main {
             System.out.println("❌ Validation Error: Registration number cannot be empty.");
             return;
         }
+
         if (!VEHICLE_PLATE_PATTERN.matcher(vehicleNumber).matches()) {
             System.out.println("❌ Validation Error: Invalid Registration format! Use 4 to 15 alphanumeric characters (hyphens/spaces allowed).");
             return;
         }
 
+        // Call DAO method to park the vehicle
         parkingDAO.parkVehicle(vehicleNumber, vehicleType);
     }
 
     /**
-     * Intercepts user inputs to clean up slot allocations and calculate fee structures.
+     * Takes the spot ID from the user
+     * and unparks the vehicle.
      */
     private static void handleUnpark() {
         System.out.print("Enter Spot ID to clear: ");
         int spotId = readIntegerInput();
-        
+
         if (spotId <= 0) {
             System.out.println("❌ Validation Error: Spot ID must be a positive integer.");
             return;
-        } 
+        }
 
+        // Call DAO method to unpark the vehicle
         parkingDAO.unparkVehicle(spotId);
     }
 
     /**
-     * Fetches complete grid records from database engine and displays formatted records.
+     * Displays all parking spots available in the database.
      */
     private static void displayAllSpots() {
         List<ParkingSpot> spots = parkingDAO.getAllSpots();
+
         if (spots.isEmpty()) {
             System.out.println("⚠️ Database is currently empty. Please configure some spots in MySQL first.");
             return;
         }
-        
+
         String border = "=========================================================================================================================";
-        
+
         System.out.println("\n" + border);
         System.out.println("                                            PARKING SYSTEM DASHBOARD                                                     ");
         System.out.println(border);
+
+        // Print all parking spot details
         spots.forEach(System.out::println);
+
         System.out.println(border);
     }
 
     /**
-     * Queries specific subset arrays based on defined classification strings.
+     * Displays all available parking spots
+     * for the selected vehicle type.
      */
     private static void displayAvailableByType() {
         System.out.print("Enter Vehicle Type to query (CAR / BIKE): ");
         String type = scanner.nextLine().trim().toUpperCase();
-        
+
         if (!type.equals("CAR") && !type.equals("BIKE")) {
             System.out.println("❌ Validation Error: Vehicle Type must be CAR or BIKE.");
             return;
         }
 
         List<ParkingSpot> availableSpots = parkingDAO.getAvailableSpotsByVehicleType(type);
+
         if (availableSpots.isEmpty()) {
             System.out.println("❌ Sorry, no available spots left for " + type);
         } else {
             System.out.println("\n--- Available " + type + " Slots ---");
+
+            // Display available spot IDs
             availableSpots.forEach(spot -> System.out.println("📍 Spot ID: " + spot.getSpotId()));
         }
     }
 
     /**
-     * Parses user inputs while catching exceptions to prevent system crashes from bad inputs.
+     * Reads an integer input from the user.
+     * Returns -1 if the input is not a valid number.
      *
-     * @return the parsed choice selection integer, or -1 fallback indicating bad format error.
+     * @return User's integer input or -1 if invalid
      */
     private static int readIntegerInput() {
         try {
             return Integer.parseInt(scanner.nextLine().trim());
         } catch (NumberFormatException e) {
-            return -1; 
+            return -1;
         }
     }
 }

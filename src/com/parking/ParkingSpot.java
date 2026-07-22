@@ -3,44 +3,36 @@ package com.parking;
 import java.sql.Timestamp;
 
 /**
- * <h2>ParkingSpot</h2>
- * Represents the core domain model (POJO / Entity class) encapsulating
- * the structural data state of an individual parking space row configuration.
+ * Data model representing a parking spot in the system.
+ * This is a standard POJO (Plain Old Java Object) that maps to a database row.
  */
 public class ParkingSpot {
     
-    /** System unique reference ID identifier key for the spot. */
+    // Unique ID for the parking spot
     private int spotId;
     
-    /** Active license record value parked inside slot; null if vacant. */
+    // License plate of the parked vehicle (null if the spot is empty)
     private String vehicleNumber;
     
-    /** Explicit space categorization restriction parameter configuration (e.g., CAR/BIKE). */
+    // Type of vehicle allowed in this spot (e.g., CAR or BIKE)
     private String vehicleType;
     
-    /** Availability state tracker flag. */
+    // Status flag: true if the spot is empty, false if occupied
     private boolean isAvailable;
     
-    /** Timestamp tracker indicating exact record check-in time. */
+    // The exact date and time the vehicle parked
     private Timestamp allocatedTime;
     
-    /** Financial variable specifying cost parameters tracked per hour metrics. */
+    // Price charged per hour for using this spot
     private double hourlyRate;
 
     /**
-     * Default no-arguments constructor initializing basic structures.
+     * Default constructor (required for various frameworks and object serialization).
      */
     public ParkingSpot() {}
 
     /**
-     * Full arguments constructor configuring complete spatial elements fields.
-     *
-     * @param spotId        Unique system lookup key index.
-     * @param vehicleNumber License text identifying vehicle state.
-     * @param vehicleType   Classification parameter mapping constraints.
-     * @param isAvailable   Boolean availability flag status tracker.
-     * @param allocatedTime Timestamp record setting exact transaction check-in point.
-     * @param hourlyRate    Financial rate value cost metric.
+     * Overloaded constructor to quickly create a complete ParkingSpot object.
      */
     public ParkingSpot(int spotId, String vehicleNumber, String vehicleType, boolean isAvailable, Timestamp allocatedTime, double hourlyRate) {
         this.spotId = spotId;
@@ -50,6 +42,8 @@ public class ParkingSpot {
         this.allocatedTime = allocatedTime;
         this.hourlyRate = hourlyRate;
     }
+
+    // --- Getters and Setters ---
 
     public int getSpotId() { return spotId; }
     public void setSpotId(int spotId) { this.spotId = spotId; }
@@ -70,10 +64,8 @@ public class ParkingSpot {
     public void setHourlyRate(double hourlyRate) { this.hourlyRate = hourlyRate; }
 
     /**
-     * Generates a tabular string presentation configuration row mapping elements perfectly.
-     * Uses uniform sizing buffers to keep text boundaries aligned within console dashboard limits.
-     *
-     * @return dynamic grid visual presentation layout representation block string.
+     * Converts the parking spot details into a clean, aligned tabular string format.
+     * This makes it easy to print the data directly onto the console dashboard.
      */
     @Override
     public String toString() {
